@@ -22,12 +22,12 @@
 ## 📸 Screenshots
 
 ### Popup Extension
-<img src="https://via.placeholder.com/320x500/667eea/ffffff?text=Extension+Popup" alt="Popup" width="300">
+<img src="{9249D960-D60C-4048-8414-2F3F91CAE1DD}.png" alt="Popup" width="300">
 
 *Giao diện đơn giản, dễ sử dụng với gradient đẹp mắt*
 
 ### Dashboard Tự Động
-<img src="https://via.placeholder.com/800x400/764ba2/ffffff?text=Dashboard+Running" alt="Dashboard" width="600">
+<img src="{C20DC89B-2CCB-45A1-92B2-93B840071E7D}.png" alt="Dashboard" width="600">
 
 *Extension tự động duyệt và xử lý tất cả môn học*
 
@@ -241,4 +241,5 @@ Nếu extension giúp ích cho bạn, hãy:
 [⬆ Về đầu trang](#-extension-đánh-giá-tự-động)
 
 </div>
+
 

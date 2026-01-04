@@ -1,64 +1,57 @@
 const ENABLED_KEY = 'auto_eval_enabled';
 const LOG_KEY = 'auto_eval_logs';
 const STATE_KEY = 'auto_eval_state';
-const MAX_LOGS = 50;
 
-// Update UI with state
+// Cập nhật UI
 function updateUI(enabled, state = null) {
-    const indicator = document.getElementById('statusIndicator');
+    const badge = document.getElementById('statusBadge');
     const statusText = document.getElementById('statusText');
-    const statusDesc = document.getElementById('statusDesc');
     const toggleBtn = document.getElementById('toggleBtn');
-    const progressSection = document.getElementById('progressSection');
+    const progress = document.getElementById('progress');
 
     if (enabled) {
-        indicator.className = 'status-indicator on';
-        indicator.textContent = '▶';
-        statusText.textContent = 'Đang chạy';
-        statusDesc.textContent = 'Extension đang tự động hoạt động';
-        toggleBtn.textContent = 'Tắt';
-        toggleBtn.classList.remove('btn-primary');
-        toggleBtn.classList.add('btn-danger');
+        // Active state
+        badge.classList.add('active');
+        statusText.textContent = 'Đang hoạt động';
 
-        // Show progress if has state
+        toggleBtn.textContent = 'Tắt Extension';
+        toggleBtn.classList.remove('btn-primary');
+        toggleBtn.classList.add('active-state'); // Màu đỏ khi đang chạy
+
         if (state) {
-            progressSection.style.display = 'block';
+            progress.style.display = 'block';
             updateProgress(state);
         }
     } else {
-        indicator.className = 'status-indicator off';
-        indicator.textContent = '⏸';
-        statusText.textContent = 'Đang tắt';
-        statusDesc.textContent = 'Bấm "Bật" để bắt đầu';
-        toggleBtn.textContent = 'Bật';
-        toggleBtn.classList.remove('btn-danger');
+        // Inactive state
+        badge.classList.remove('active');
+        statusText.textContent = 'Đã tắt';
+
+        toggleBtn.textContent = 'Bật Extension';
+        toggleBtn.classList.remove('active-state');
         toggleBtn.classList.add('btn-primary');
-        progressSection.style.display = 'none';
+
+        progress.style.display = 'none';
     }
 }
 
 function updateProgress(state) {
     const total = state.currentIndex;
-    const processed = state.processedCount || 0;
-    const skipped = state.skippedCount || 0;
-    const errors = state.errorCount || 0;
-    const completedTotal = processed + skipped;
+    const complete = state.processedCount || 0;
+    const skip = state.skippedCount || 0;
+    const error = state.errorCount || 0;
+    const done = complete + skip;
 
-    // Update progress bar
-    const progressFill = document.getElementById('progressFill');
-    const progressText = document.getElementById('progressText');
-    const percentage = total > 0 ? (completedTotal / total) * 100 : 0;
+    const percentage = total > 0 ? (done / total) * 100 : 0;
 
-    progressFill.style.width = percentage + '%';
-    progressText.textContent = `${completedTotal}/${total}`;
+    document.getElementById('progressFill').style.width = percentage + '%';
+    document.getElementById('progressValue').textContent = `${done}/${total}`;
 
-    // Update stats
-    document.getElementById('statProcessed').textContent = processed;
-    document.getElementById('statSkipped').textContent = skipped;
-    document.getElementById('statError').textContent = errors;
+    document.getElementById('statComplete').textContent = complete;
+    document.getElementById('statSkip').textContent = skip;
+    document.getElementById('statError').textContent = error;
 }
 
-// Load state and update UI
 function loadState() {
     chrome.storage.local.get([ENABLED_KEY, STATE_KEY], function (result) {
         const enabled = result[ENABLED_KEY] || false;
@@ -67,13 +60,11 @@ function loadState() {
     });
 }
 
-// Initial load
+// Khởi tạo chạy ngay
 loadState();
-
-// Refresh every second to update progress
 setInterval(loadState, 1000);
 
-// Toggle on/off
+// Nút Bật/Tắt
 document.getElementById('toggleBtn').addEventListener('click', function () {
     chrome.storage.local.get([ENABLED_KEY], function (result) {
         const newState = !result[ENABLED_KEY];
@@ -82,23 +73,25 @@ document.getElementById('toggleBtn').addEventListener('click', function () {
 
             if (newState) {
                 chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-                    chrome.tabs.reload(tabs[0].id);
+                    if (tabs[0]) chrome.tabs.reload(tabs[0].id);
                 });
             }
         });
     });
 });
 
-// Reset
+// Nút Reset
 document.getElementById('resetBtn').addEventListener('click', function () {
-    if (confirm('Reset tiến trình? Extension sẽ bắt đầu lại từ môn đầu tiên.')) {
+    if (confirm('Reset tiến trình? Extension sẽ bắt đầu lại từ đầu.')) {
         chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-            chrome.tabs.sendMessage(tabs[0].id, { action: 'reset' }, function (response) {
+            if (tabs[0]) {
+                chrome.tabs.sendMessage(tabs[0].id, { action: 'reset' }, function () { });
+                // Xóa log và state
                 chrome.storage.local.set({ [LOG_KEY]: [], [STATE_KEY]: null }, function () {
                     alert('Đã reset! Reload trang để bắt đầu lại.');
                     chrome.tabs.reload(tabs[0].id);
                 });
-            });
+            }
         });
     }
 });
@@ -115,14 +108,18 @@ function displayLogs(logs) {
     const container = document.getElementById('logContainer');
 
     if (logs.length === 0) {
-        container.innerHTML = '<div class="log-empty">Chưa có log nào</div>';
+        container.innerHTML = '<div class="log-empty">Chưa có log</div>';
         return;
     }
 
     container.innerHTML = logs.map(log => {
-        const time = new Date(log.timestamp).toLocaleTimeString('vi-VN');
+        const time = new Date(log.timestamp).toLocaleTimeString('vi-VN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
         return `<div class="log-entry ${log.type}">
-            <span class="time">[${time}]</span>
+            <span class="time">${time}</span>
             <span>${log.message}</span>
         </div>`;
     }).join('');
@@ -130,25 +127,22 @@ function displayLogs(logs) {
     container.scrollTop = container.scrollHeight;
 }
 
-// Clear logs
-document.getElementById('clearLogBtn').addEventListener('click', function () {
+document.getElementById('clearLog').addEventListener('click', function () {
     chrome.storage.local.set({ [LOG_KEY]: [] }, function () {
         displayLogs([]);
     });
 });
 
-// Toggle log visibility
-document.getElementById('toggleLogBtn').addEventListener('click', function () {
-    const logCard = document.getElementById('logCard');
-    logCard.classList.toggle('show');
-    this.textContent = logCard.classList.contains('show') ? '📋 Ẩn log' : '📋 Xem log chi tiết';
+document.getElementById('logToggle').addEventListener('click', function () {
+    const section = document.getElementById('logSection');
+    section.classList.toggle('open');
+    this.textContent = section.classList.contains('open') ? 'Ẩn log' : 'Xem log chi tiết';
 });
 
-// Load logs initially and refresh
 loadLogs();
 setInterval(loadLogs, 1000);
 
-// Listen for changes
+// Lắng nghe thay đổi từ storage để cập nhật UI realtime
 chrome.storage.onChanged.addListener(function (changes, namespace) {
     if (namespace === 'local') {
         if (changes[LOG_KEY]) {

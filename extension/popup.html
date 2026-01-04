@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-soft: #dbeafe;
+            --success: #059669;
+            --success-soft: #d1fae5;
+            --danger: #dc2626;
+            --danger-soft: #fee2e2;
+            --text-main: #1f2937;
+            --text-sub: #6b7280;
+            --bg-body: #f3f4f6;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            width: 320px;
+            background-color: var(--bg-body);
+            background-image: radial-gradient(circle at 100% 0%, #e0e7ff 0%, transparent 25%), radial-gradient(circle at 0% 100%, #f3e8ff 0%, transparent 25%);
+            color: var(--text-main);
+            padding: 16px;
+            min-height: 450px;
+        }
+
+        /* CARD STYLE */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            transition: transform 0.2s ease;
+        }
+
+        /* HEADER */
+        .header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+            color: #111827;
+        }
+
+        .header p {
+            font-size: 13px;
+            color: var(--text-sub);
+        }
+
+        /* STATUS BADGE */
+        .status-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 16px;
+            background: var(--danger-soft);
+            color: var(--danger);
+            border-radius: 99px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: currentColor;
+            border-radius: 50%;
+            margin-right: 8px;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+        }
+
+        .status-badge.active {
+            background: var(--success-soft);
+            color: var(--success);
+        }
+
+        .status-badge.active .status-dot {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        /* PROGRESS BAR */
+        .progress-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .progress-track {
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* STATS GRID */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            text-align: center;
+        }
+
+        .stat-item {
+            background: #f9fafb;
+            padding: 12px 8px;
+            border-radius: 12px;
+            border: 1px solid #f3f4f6;
+        }
+
+        .stat-value {
+            display: block;
+            font-size: 18px;
+            font-weight: 800;
+            color: #111827;
+            line-height: 1.2;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--text-sub);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+
+        /* BUTTONS */
+        .btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .btn {
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-danger {
+            background: var(--white);
+            color: var(--danger);
+            border: 1px solid var(--danger-soft);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-soft);
+        }
+
+        .btn.active-state {
+            background: var(--danger);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.3);
+        }
+
+        .btn.active-state:hover {
+            background: #b91c1c;
+        }
+
+        /* INFO BOX */
+        .info-box {
+            background: #eff6ff;
+            color: #1e40af;
+            font-size: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.5;
+            margin-bottom: 16px;
+            border: 1px solid #dbeafe;
+        }
+
+        .info-box strong {
+            font-weight: 700;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .info-box ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        .info-box li {
+            margin-bottom: 2px;
+        }
+
+        /* LOGS */
+        .log-btn {
+            width: 100%;
+            background: transparent;
+            color: var(--text-sub);
+            border: 1px solid #e5e7eb;
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .log-btn:hover {
+            background: #f9fafb;
+            color: var(--text-main);
+            border-color: #d1d5db;
+        }
+
+        .log-section {
+            margin-top: 12px;
+            background: #111827;
+            border-radius: 12px;
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.3s ease;
+        }
+
+        .log-section.open {
+            max-height: 200px;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #1f2937;
+            border-bottom: 1px solid #374151;
+        }
+
+        .log-title {
+            color: #9ca3af;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .clear-log {
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-size: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .log-container {
+            max-height: 160px;
+            overflow-y: auto;
+            padding: 8px;
+            font-family: "SF Mono", Consolas, monospace;
+        }
+
+        .log-entry {
+            font-size: 10px;
+            padding: 4px 6px;
+            border-radius: 4px;
+            margin-bottom: 4px;
+            color: #e5e7eb;
+            display: flex;
+            gap: 8px;
+        }
+
+        .log-entry .time {
+            color: #6b7280;
+            min-width: 45px;
+        }
+
+        .log-entry.error {
+            color: #fca5a5;
+        }
+
+        .log-entry.success {
+            color: #86efac;
+        }
+
+        .log-empty {
+            text-align: center;
+            padding: 20px;
+            color: #4b5563;
+            font-size: 11px;
+            font-style: italic;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 2px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <div class="header">
+            <h1>Đánh Giá Tự Động</h1>
+            <p>Phiên bản Minimalist 2.0</p>
+        </div>
+
+        <div class="status-container">
+            <span id="statusBadge" class="status-badge">
+                <span class="status-dot"></span>
+                <span id="statusText">Không hoạt động</span>
+            </span>
+        </div>
+
+        <div class="btn-group">
+            <button id="toggleBtn" class="btn btn-primary">Bật Extension</button>
+            <button id="resetBtn" class="btn btn-danger">Reset</button>
+        </div>
+
+        <div class="info-box">
+            <strong>💡 Hướng dẫn nhanh</strong>
+            <ul>
+                <li>Truy cập trang đánh giá</li>
+                <li>Bấm nút <b>Bật</b> ở trên</li>
+                <li>Thư giãn & chờ đợi</li>
+            </ul>
+        </div>
+
+        <div id="progress" class="progress-section" style="display: none;">
+            <div class="progress-header">
+                <span>Tiến độ</span>
+                <span id="progressValue">0/0</span>
+            </div>
+            <div class="progress-track">
+                <div id="progressFill" class="progress-fill"></div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span id="statComplete" class="stat-value">0</span>
+                    <span class="stat-label">Xong</span>
+                </div>
+                <div class="stat-item">
+                    <span id="statSkip" class="stat-value">0</span>
+                    <span class="stat-label">Bỏ qua</span>
+                </div>
+                <div class="stat-item">
+                    <span id="statError" class="stat-value">0</span>
+                    <span class="stat-label">Lỗi</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button id="logToggle" class="log-btn">Hiển thị Nhật ký</button>
+
+    <div id="logSection" class="log-section">
+        <div class="log-header">
+            <span class="log-title">System Log</span>
+            <button id="clearLog" class="clear-log">CLEAR</button>
+        </div>
+        <div id="logContainer" class="log-container">
+            <div class="log-empty">Chưa có dữ liệu log</div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+
+</html>

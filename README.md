@@ -203,30 +203,11 @@ Hoàn toàn an toàn. Code mở (open source), bạn có thể kiểm tra. Khôn
 
 ---
 
-## 🤝 Đóng Góp
-
-Contributions, issues và feature requests đều được chào đón!
-
-1. Fork repo
-2. Tạo branch: `git checkout -b feature/AmazingFeature`
-3. Commit: `git commit -m 'Add some AmazingFeature'`
-4. Push: `git push origin feature/AmazingFeature`
-5. Mở Pull Request
-
----
-
-## 📝 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
----
-
 ## 👨‍💻 Tác Giả
 
-**[Your Name]**
+**[Ng Khoa]**
 
-- GitHub: [@your-username](https://github.com/your-username)
-- Email: your-email@example.com
+- Email: dangkhoash@gmail.com
 
 ---
 
@@ -260,3 +241,4 @@ Nếu extension giúp ích cho bạn, hãy:
 [⬆ Về đầu trang](#-extension-đánh-giá-tự-động)
 
 </div>
+

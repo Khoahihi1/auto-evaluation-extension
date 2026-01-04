@@ -50,7 +50,7 @@ Download ZIP**
 4. Chọn thư mục `extension`
 5. Hoàn tất! Extension sẽ xuất hiện trên toolbar
 
-![Hướng dẫn cài đặt](https://via.placeholder.com/600x300/667eea/ffffff?text=Installation+Guide)
+![Hướng dẫn cài đặt]({4F7DEC9A-18A0-40FC-8707-BCE68D7A619A}.png)
 
 ---
 

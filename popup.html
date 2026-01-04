@@ -15,9 +15,7 @@
             --text-sub: #6b7280;
             --bg-body: #f3f4f6;
             --white: #ffffff;
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             --radius: 16px;
         }
 
@@ -29,12 +27,13 @@
         }
 
         body {
-            width: 320px;
+            width: 350px;
+            /* Tăng chiều rộng chút cho thoải mái */
             background-color: var(--bg-body);
             background-image: radial-gradient(circle at 100% 0%, #e0e7ff 0%, transparent 25%), radial-gradient(circle at 0% 100%, #f3e8ff 0%, transparent 25%);
             color: var(--text-main);
             padding: 16px;
-            min-height: 450px;
+            min-height: 550px;
         }
 
         /* CARD STYLE */
@@ -45,7 +44,6 @@
             padding: 20px;
             margin-bottom: 16px;
             border: 1px solid rgba(255, 255, 255, 0.7);
-            transition: transform 0.2s ease;
         }
 
         /* HEADER */
@@ -57,7 +55,6 @@
         .header h1 {
             font-size: 18px;
             font-weight: 700;
-            letter-spacing: -0.5px;
             margin-bottom: 4px;
             color: #111827;
         }
@@ -92,7 +89,6 @@
             background: currentColor;
             border-radius: 50%;
             margin-right: 8px;
-            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
         }
 
         .status-badge.active {
@@ -118,71 +114,6 @@
             }
         }
 
-        /* PROGRESS BAR */
-        .progress-section {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #f3f4f6;
-        }
-
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-sub);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .progress-track {
-            height: 8px;
-            background: #e5e7eb;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 16px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
-            width: 0%;
-            border-radius: 10px;
-            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* STATS GRID */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 12px;
-            text-align: center;
-        }
-
-        .stat-item {
-            background: #f9fafb;
-            padding: 12px 8px;
-            border-radius: 12px;
-            border: 1px solid #f3f4f6;
-        }
-
-        .stat-value {
-            display: block;
-            font-size: 18px;
-            font-weight: 800;
-            color: #111827;
-            line-height: 1.2;
-        }
-
-        .stat-label {
-            font-size: 10px;
-            color: var(--text-sub);
-            font-weight: 600;
-            text-transform: uppercase;
-            margin-top: 4px;
-        }
-
         /* BUTTONS */
         .btn-group {
             display: grid;
@@ -199,8 +130,6 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
-            position: relative;
-            overflow: hidden;
         }
 
         .btn:active {
@@ -230,11 +159,6 @@
         .btn.active-state {
             background: var(--danger);
             color: white;
-            box-shadow: 0 4px 6px -1px rgba(220, 38, 38, 0.3);
-        }
-
-        .btn.active-state:hover {
-            background: #b91c1c;
         }
 
         /* INFO BOX */
@@ -262,6 +186,64 @@
 
         .info-box li {
             margin-bottom: 2px;
+        }
+
+        /* FOOTER INFO - Đã làm nổi bật hơn */
+        .footer-info {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .footer-text {
+            font-size: 11px;
+            color: #475569;
+            margin-bottom: 10px;
+            line-height: 1.4;
+            font-style: italic;
+        }
+
+        .link-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .contact-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .contact-link:hover {
+            text-decoration: underline;
+        }
+
+        .donate-link {
+            display: inline-flex;
+            align-items: center;
+            color: #be185d;
+            /* Pink đậm */
+            background: #fdf2f8;
+            /* Pink nhạt */
+            padding: 8px 16px;
+            border-radius: 99px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 11px;
+            border: 1px solid #fce7f3;
+            transition: all 0.2s;
+        }
+
+        .donate-link:hover {
+            background: #fce7f3;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
 
         /* LOGS */
@@ -344,14 +326,6 @@
             min-width: 45px;
         }
 
-        .log-entry.error {
-            color: #fca5a5;
-        }
-
-        .log-entry.success {
-            color: #86efac;
-        }
-
         .log-empty {
             text-align: center;
             padding: 20px;
@@ -360,7 +334,6 @@
             font-style: italic;
         }
 
-        /* Scrollbar */
         ::-webkit-scrollbar {
             width: 4px;
         }
@@ -372,6 +345,68 @@
 
         ::-webkit-scrollbar-track {
             background: transparent;
+        }
+
+        /* Stats & Progress hidden by default */
+        .progress-section {
+            display: none;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px dashed #e5e7eb;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            font-weight: 700;
+            color: #6b7280;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .progress-track {
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #10b981;
+            width: 0%;
+            border-radius: 10px;
+            transition: width 0.3s;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 8px;
+            text-align: center;
+        }
+
+        .stat-item {
+            background: #f8fafc;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: 800;
+            color: #0f172a;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 9px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
         }
     </style>
 </head>
@@ -404,7 +439,24 @@
             </ul>
         </div>
 
-        <div id="progress" class="progress-section" style="display: none;">
+        <!-- FOOTER INFO SECTION -->
+        <div class="footer-info">
+            <p class="footer-text">
+                Dự án này được xây dựng với mục tiêu phi lợi nhuận, tập trung vào học tập, nghiên cứu và phát triển kỹ
+                năng.
+            </p>
+            <div class="link-group">
+                <a href="https://www.facebook.com/khoangdangg/" target="_blank" class="contact-link">
+                    Liên hệ Facebook (Khoa)
+                </a>
+                <a href="https://me.momo.vn/1MIVTysAtEuBinIAIVC1UR" target="_blank" class="donate-link">
+                    ☕ Donate ly cà phê (Momo)
+                </a>
+            </div>
+        </div>
+
+        <!-- PROGRESS SECTION -->
+        <div id="progress" class="progress-section">
             <div class="progress-header">
                 <span>Tiến độ</span>
                 <span id="progressValue">0/0</span>

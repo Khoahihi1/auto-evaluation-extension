@@ -50,6 +50,7 @@
         // Vẫn log ra console
         console.log(`[Auto Eval] ${message}`);
     }
+
     function runAutoEval() {
         const text1 = [
             "Giảng viên có kiến thức chuyên môn vững vàng.",
@@ -325,7 +326,42 @@
 
 
         const rand = arr => arr[Math.floor(Math.random() * arr.length)];
-        const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+        // --- CẢI TIẾN: SMART WAIT ---
+        function waitFor(selector, timeout = 10000) {
+            return new Promise((resolve, reject) => {
+                // Kiểm tra ngay lập tức
+                const el = document.querySelector(selector);
+                if (el) return resolve(el);
+
+                // Nếu chưa có, dùng MutationObserver để chờ
+                const observer = new MutationObserver(() => {
+                    const el = document.querySelector(selector);
+                    if (el) {
+                        observer.disconnect();
+                        resolve(el);
+                    }
+                });
+
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true
+                });
+
+                // Timeout để tránh treo mãi mãi
+                setTimeout(() => {
+                    observer.disconnect();
+                    // Nếu timeout, thử check lại lần cuối
+                    const el = document.querySelector(selector);
+                    if (el) resolve(el);
+                    else reject(new Error(`Timeout waiting for ${selector}`));
+                }, timeout);
+            });
+        }
+
+        // Delay ngẫu nhiên nhỏ để giống người dùng (200ms - 500ms)
+        const randomDelay = () => new Promise(resolve => setTimeout(resolve, 200 + Math.random() * 300));
+
 
         function getState() {
             const state = localStorage.getItem(STATE_KEY);
@@ -356,7 +392,7 @@
                 return 'form';
             }
             // Trang dashboard (có danh sách môn học)
-            if (document.getElementById('gvMonHoc_lbTinhTrang_0')) {
+            if (document.getElementById('gvMonHoc_lbTinhTrang_0') || document.getElementById('gvMonHoc')) {
                 return 'dashboard';
             }
             return 'unknown';
@@ -365,79 +401,88 @@
         async function handleFormPage() {
             addLog("=== XỬ LÝ TRANG FORM ===", "info");
 
-            await delay(1500);
+            try {
+                // Chờ radio button xuất hiện (max 10s)
+                addLog("Đang chờ form tải...", "info");
+                await waitFor('td input[type="radio"]');
+                await randomDelay(); // Delay nhẹ
 
-            let count = 0;
-            const allInputs = document.querySelectorAll('td input');
+                let count = 0;
+                const allInputs = document.querySelectorAll('td input');
 
-            let hasRd6 = false;
-            allInputs.forEach(el => {
-                if (/^gv\d+_rd6_/.test(el.id)) hasRd6 = true;
-            });
+                let hasRd6 = false;
+                allInputs.forEach(el => {
+                    if (/^gv\d+_rd6_/.test(el.id)) hasRd6 = true;
+                });
 
-            const patternHighest = hasRd6 ? /^gv\d+_rd6_/ : /^gv\d+_rd5_/;
-            const levelName = hasRd6 ? "6" : "5";
+                const patternHighest = hasRd6 ? /^gv\d+_rd6_/ : /^gv\d+_rd5_/;
+                const levelName = hasRd6 ? "6" : "5";
 
-            allInputs.forEach(element => {
-                const id = element.id;
-                if (patternHighest.test(id)) {
-                    element.checked = true;
-                    element.click();
-                    count++;
+                allInputs.forEach(element => {
+                    const id = element.id;
+                    if (patternHighest.test(id)) {
+                        element.checked = true;
+                        // element.click(); // Click đôi khi gây postback sớm nếu không cẩn thận, check=true an toàn hơn với ASP.NET
+                        count++;
+                    }
+                });
+
+                addLog(`Đã chọn ${count} câu mức ${levelName}`, "success");
+
+                const textareas = document.querySelectorAll('textarea');
+                if (textareas.length >= 2) {
+                    textareas[0].value = rand(text1);
+                    textareas[0].dispatchEvent(new Event('input', { bubbles: true })); // Trigger event để JS trang web nhận biết
+                    textareas[1].value = rand(text2);
+                    textareas[1].dispatchEvent(new Event('input', { bubbles: true }));
+                    addLog("Đã điền text", "success");
                 }
-            });
 
-            addLog(`Đã chọn ${count} câu mức ${levelName}`, "success");
+                await randomDelay();
 
-            const textareas = document.querySelectorAll('textarea');
-            if (textareas.length >= 2) {
-                textareas[0].value = rand(text1);
-                textareas[0].dispatchEvent(new Event('input', { bubbles: true }));
-                textareas[1].value = rand(text2);
-                textareas[1].dispatchEvent(new Event('input', { bubbles: true }));
-                addLog("Đã điền text", "success");
-            }
+                // Tìm nút Tiếp Tục
+                const btnTiepTuc = document.getElementById('btnTiepTuc');
+                if (btnTiepTuc) {
+                    addLog("Click btnTiepTuc...", "info");
 
-            await delay(1500);
+                    // Lưu state
+                    const state = getState();
+                    state.mode = 'confirm';
+                    saveState(state);
 
-            const btnTiepTuc = document.getElementById('btnTiepTuc');
-            if (btnTiepTuc) {
-                addLog("Click btnTiepTuc (chuyển sang trang xác nhận)", "info");
+                    btnTiepTuc.click();
+                    // KHÔNG wait nữa, để trang tự load
+                } else {
+                    addLog("Lỗi: Không tìm thấy nút Tiếp Tục", "error");
+                }
 
-                // Lưu state trước khi chuyển trang
-                const state = getState();
-                state.mode = 'confirm';
-                saveState(state);
-
-                btnTiepTuc.click();
-                // Sau khi click, sẽ chuyển sang trang xác nhận
-            } else {
-                addLog("KHÔNG tìm thấy btnTiepTuc!", "error");
+            } catch (e) {
+                addLog(`Lỗi Form: ${e.message}`, "error");
             }
         }
 
-        // XỬ LÝ TRANG XÁC NHẬN (có btnTiepTucDanhGia)
+        // XỬ LÝ TRANG XÁC NHẬN
         async function handleConfirmPage() {
             addLog("=== XỬ LÝ TRANG XÁC NHẬN ===", "info");
 
-            await delay(1500);
+            try {
+                // Chờ nút xác nhận
+                await waitFor('#btnTiepTucDanhGia');
+                await randomDelay();
 
-            const btnTiepTucDanhGia = document.getElementById('btnTiepTucDanhGia');
-            if (btnTiepTucDanhGia) {
-                addLog("Click btnTiepTucDanhGia (quay về Dashboard)", "info");
+                const btn = document.getElementById('btnTiepTucDanhGia');
+                addLog("Click Xác Nhận...", "info");
 
-                // Cập nhật state trước khi quay về dashboard
                 const state = getState();
                 state.currentIndex++;
                 state.processedCount++;
                 state.mode = 'dashboard';
                 saveState(state);
 
-                addLog(`Hoàn thành môn! Tiếp tục môn ${state.currentIndex}`, "success");
-                btnTiepTucDanhGia.click();
-                // Sau khi click, sẽ quay về Dashboard
-            } else {
-                addLog("KHÔNG tìm thấy btnTiepTucDanhGia!", "error");
+                addLog(`Hoàn thành! Chuyển môn tiếp theo...`, "success");
+                btn.click();
+            } catch (e) {
+                addLog(`Lỗi Xác Nhận: ${e.message}`, "error");
             }
         }
 
@@ -445,95 +490,89 @@
             const state = getState();
             addLog(`=== DASHBOARD - MÔN ${state.currentIndex} ===`, "info");
 
-            await delay(1500);
+            try {
+                // Chờ bảng môn học load
+                await waitFor('#gvMonHoc'); // Chờ table chính
+                await randomDelay();
 
-            const statusLabel = document.getElementById(`gvMonHoc_lbTinhTrang_${state.currentIndex}`);
+                const statusLabel = document.getElementById(`gvMonHoc_lbTinhTrang_${state.currentIndex}`);
 
-            if (!statusLabel) {
-                addLog("KẾT THÚC - Không còn môn học!", "success");
-                addLog(`Đã đánh giá: ${state.processedCount}, Bỏ qua: ${state.skippedCount}`, "info");
-                clearState();
-                return;
-            }
+                if (!statusLabel) {
+                    addLog("Đã hết môn học!", "success");
+                    addLog(`Tổng kết: ${state.processedCount} Xong, ${state.skippedCount} Bỏ qua`, "info");
+                    clearState();
+                    return;
+                }
 
-            const statusText = statusLabel.textContent.trim();
-            addLog(`Trạng thái: ${statusText}`, "info");
+                const statusText = statusLabel.textContent.trim();
+                addLog(`Trạng thái Mon ${state.currentIndex}: ${statusText}`, "info");
 
-            if (statusText.includes("Đã đánh giá") || statusText.includes("Finished")) {
-                addLog("Bỏ qua môn này", "info");
-                state.currentIndex++;
-                state.skippedCount++;
-                saveState(state);
-                await delay(500);
-                handleDashboard();
-                return;
-            }
+                // Logic bỏ qua
+                if (statusText.includes("Đã đánh giá") || statusText.includes("Finished")) {
+                    addLog("-> Đã xong, bỏ qua.", "info");
+                    state.currentIndex++;
+                    state.skippedCount++;
+                    saveState(state);
+                    // Reload nhẹ hoặc gọi lại hàm (nhưng tốt nhất là reload để clear DOM cũ)
+                    window.location.reload();
+                    return;
+                }
 
-            if (statusText.includes("Chưa đánh giá") || statusText.includes("Not yet")) {
-                addLog("Cần đánh giá", "info");
+                if (statusText.includes("Chưa đánh giá") || statusText.includes("Not yet")) {
+                    addLog("-> Chưa đánh giá. Vào form...", "info");
 
-                const selectPattern = `Select$${state.currentIndex}`;
+                    const selectPattern = `Select$${state.currentIndex}`;
 
-                addLog("Trigger __doPostBack...", "info");
-
-                // Cách 1: Gọi __doPostBack trực tiếp (nếu có)
-                if (typeof window.__doPostBack === 'function') {
+                    // Set state trước khi chuyển
                     state.mode = 'form';
                     saveState(state);
 
-                    addLog("Gọi __doPostBack('gvMonHoc', 'Select$" + state.currentIndex + "')", "info");
-                    window.__doPostBack('gvMonHoc', selectPattern);
-                } else {
-                    // Cách 2: Submit form với __EVENTTARGET và __EVENTARGUMENT
-                    const form = document.querySelector('form');
-                    if (form) {
-                        let eventTarget = document.getElementById('__EVENTTARGET');
-                        let eventArgument = document.getElementById('__EVENTARGUMENT');
-
-                        if (!eventTarget) {
-                            eventTarget = document.createElement('input');
-                            eventTarget.type = 'hidden';
-                            eventTarget.id = '__EVENTTARGET';
-                            eventTarget.name = '__EVENTTARGET';
-                            form.appendChild(eventTarget);
-                        }
-
-                        if (!eventArgument) {
-                            eventArgument = document.createElement('input');
-                            eventArgument.type = 'hidden';
-                            eventArgument.id = '__EVENTARGUMENT';
-                            eventArgument.name = '__EVENTARGUMENT';
-                            form.appendChild(eventArgument);
-                        }
-
-                        state.mode = 'form';
-                        saveState(state);
-
-                        eventTarget.value = 'gvMonHoc';
-                        eventArgument.value = selectPattern;
-
-                        addLog("Submit form với __EVENTTARGET='gvMonHoc', __EVENTARGUMENT='" + selectPattern + "'", "info");
-                        form.submit();
+                    if (typeof window.__doPostBack === 'function') {
+                        window.__doPostBack('gvMonHoc', selectPattern);
                     } else {
-                        addLog("Không tìm thấy form để submit!", "error");
-                        state.currentIndex++;
-                        state.errorCount++;
-                        saveState(state);
+                        // Fallback submit form
+                        const form = document.querySelector('form');
+                        if (form) {
+                            let target = document.getElementById('__EVENTTARGET');
+                            if (!target) {
+                                target = document.createElement('input');
+                                target.type = 'hidden';
+                                target.name = '__EVENTTARGET';
+                                form.appendChild(target);
+                            }
+                            target.value = 'gvMonHoc';
+
+                            let arg = document.getElementById('__EVENTARGUMENT');
+                            if (!arg) {
+                                arg = document.createElement('input');
+                                arg.type = 'hidden';
+                                arg.name = '__EVENTARGUMENT';
+                                form.appendChild(arg);
+                            }
+                            arg.value = selectPattern;
+
+                            form.submit();
+                        }
                     }
                 }
+
+            } catch (e) {
+                addLog(`Lỗi Dashboard: ${e.message}`, "error");
+                // Nếu lỗi quá lâu, có thể thử reload trang để reset
+                // setTimeout(() => window.location.reload(), 5000);
             }
         }
 
         const currentPage = detectPage();
 
         if (currentPage === 'form') {
-            addLog("Phát hiện trang FORM - Bắt đầu...", "info");
+            addLog("Phát hiện: Form Đánh Giá", "info");
             handleFormPage();
         } else if (currentPage === 'confirm') {
-            addLog("Phát hiện trang XÁC NHẬN - Bắt đầu...", "info");
+            addLog("Phát hiện: Trang Xác Nhận", "info");
             handleConfirmPage();
         } else if (currentPage === 'dashboard') {
-            addLog("Phát hiện trang DASHBOARD - Bắt đầu...", "info");
+            addLog("Phát hiện: Dashboard", "info");
             handleDashboard();
         }
     }
